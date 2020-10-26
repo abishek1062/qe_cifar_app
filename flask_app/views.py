@@ -4,19 +4,20 @@ from flask_app.model import *
 import torch
 from torch.nn import Softmax
 import numpy as np
-from flask import request 
+from flask import request, jsonify
 
 
-@app.route('/')
+@app.route('/',methods=['GET','POST'])
 def recognizeImage():
+    try:
+        base64string = request.get_json(force=True)['base64']
+    except:
+        return jsonify(error = "payload does not have base64", message = 'failure!')
 
-    base64string = request.get_json(force=True)['base64']
     try:
         image = get_image(base64string)
     except:
-        print({'prediction' : 'improper base64 encoding', 'message' : "failure!" })
-        return {'prediction' : 'improper base64 encoding', 'message' : "failure!" }
-
+        return jsonify(error = 'improper base64 encoding', message = "failure!")
 
     if image.shape[1:] != (3,32,32):
         return jsonify( error = "only RGB image 32x32 accepted", message = "failure!" )
@@ -41,5 +42,4 @@ def recognizeImage():
     for i,prob in enumerate(output):
         pred_dict[classes[i]] = str(prob)
 
-    print({'prediction' : pred_dict, 'message' : "success!" })
-    return {'prediction' : pred_dict, 'message' : "success!" }
+    return jsonify(prediction = pred_dict, message = "success!" )
