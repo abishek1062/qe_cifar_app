@@ -1,18 +1,22 @@
 from flask_app import app
+from flask_app.preprocessImage import *
+from flask_app.model import *
 import torch
 from torch.nn import Softmax
 import numpy as np
-from preprocessImage import *
-from model import *
+from flask import request 
 
-with open("./sample_cifar10_base64/image0.txt") as f:
-    base64string = f.read()
 
 @app.route('/')
 def recognizeImage():
 
-	base64string = request.get_json(force=True)['base64']
-    image = get_image(base64string)
+    base64string = request.get_json(force=True)['base64']
+    try:
+        image = get_image(base64string)
+    except:
+        print({'prediction' : 'improper base64 encoding', 'message' : "failure!" })
+        return {'prediction' : 'improper base64 encoding', 'message' : "failure!" }
+
 
     if image.shape[1:] != (3,32,32):
         return jsonify( error = "only RGB image 32x32 accepted", message = "failure!" )

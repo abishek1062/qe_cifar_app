@@ -43,7 +43,7 @@ def get_model():
 
     # create a complete CNN
     model = Net()
-    model.load_state_dict(torch.load('./model_cifar.pt'))
+    model.load_state_dict(torch.load('./flask_app/model_cifar.pt'))
     model.eval()
 
     return model
